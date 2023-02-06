@@ -100,7 +100,7 @@ const Title = styled.h1`
   margin-top: 3rem;
  `;
 
-const SignUpBtn = styled(Link)`
+const BBtn = styled.button`
   display: block;
   margin: auto;
   padding: 10px 20px;
@@ -130,10 +130,6 @@ const SignUpBtn = styled(Link)`
    margin-top: 1rem;   
    height: 40px;
   }
-  `;
-
-const Select = styled.select`
-    width: 200px;
   `;
 
 const Div = styled.div`
@@ -276,9 +272,7 @@ export default function Checkout() {
               placeholder="Last Name"
             />
 
-            <Input
-              type="text"
-              name="phoneNo"
+            <PhoneInput
               value={checkoutData.phoneNo}
               onChange={handleChange}
               placeholder="Phone Number"
@@ -316,7 +310,7 @@ export default function Checkout() {
               placeholder="Zipcode (Five Digits)"
             />
 
-            <SignUpBtn onClick={handleSubmit}>Place Order</SignUpBtn>
+            <BBtn onClick={handleSubmit}>Place Order</BBtn>
           </Form>
         </RegContainer>
         <CartCont>
