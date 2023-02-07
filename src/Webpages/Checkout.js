@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 const Logo = styled(Link)`
   font-family: 'inter';      
@@ -152,6 +153,10 @@ const TotalSpan = styled.span`
    
   `;
 
+const PInputStyle = {
+  width: '40px',
+};
+
 export default function Checkout() {
   const [checkoutData, setCheckOutData] = React.useState({
     firstname: '',
@@ -183,6 +188,17 @@ export default function Checkout() {
       </>
     );
   });
+
+  function handlePhone(event) {
+    console.log(checkoutData.phoneNo);
+
+    setCheckOutData((prevCheckoutData) => {
+      return {
+        ...prevCheckoutData,
+        phoneNo: event,
+      };
+    });
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -274,8 +290,11 @@ export default function Checkout() {
 
             <PhoneInput
               value={checkoutData.phoneNo}
-              onChange={handleChange}
+              onChange={handlePhone}
               placeholder="Phone Number"
+              style={{ width: '250px', padding: '30px' }}
+              maxLength="15"
+              id="phoneInputID"
             />
 
             <Input
