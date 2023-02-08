@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { parse, isValidNumber } from 'libphonenumber-js';
 
 const Logo = styled(Link)`
   font-family: 'inter';      
@@ -168,6 +169,7 @@ export default function Checkout() {
     address2: '',
   });
 
+  const [countryCode, setCountryCode] = React.useState('PK');
   const [error, setError] = React.useState(false);
   const [errorText, setErrorText] = React.useState('');
   const [placed, setPlaced] = React.useState(false);
@@ -190,8 +192,6 @@ export default function Checkout() {
   });
 
   function handlePhone(event) {
-    console.log(checkoutData.phoneNo);
-
     setCheckOutData((prevCheckoutData) => {
       return {
         ...prevCheckoutData,
@@ -293,7 +293,9 @@ export default function Checkout() {
               onChange={handlePhone}
               placeholder="Phone Number"
               style={{ width: '250px', padding: '30px' }}
-              maxLength="15"
+              defaultCountry="PK"
+              countries={['PK']}
+              maxlength="12"
               id="phoneInputID"
             />
 
