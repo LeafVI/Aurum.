@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { parse, isValidNumber } from 'libphonenumber-js';
+import cardValidator from 'card-validator';
 
 const Logo = styled(Link)`
   font-family: 'inter';      
@@ -96,6 +96,26 @@ const Input = styled.input`
    margin: 0.5rem;
    padding: 10px;   
   }
+ `;
+
+const CCInput = styled.input.attrs({ maxLength: 16 })`
+ margin: 1rem;
+ padding: 20px;
+
+ @media (max-width: 1000px) {
+  margin: 0.5rem;
+  padding: 10px;   
+ }
+ `;
+
+const ZipInput = styled.input.attrs({ maxLength: 5 })`
+ margin: 1rem;
+ padding: 20px;
+
+ @media (max-width: 1000px) {
+  margin: 0.5rem;
+  padding: 10px;   
+ }
  `;
 
 const Title = styled.h1`
@@ -204,21 +224,16 @@ export default function Checkout() {
     const { name, value } = event.target;
     setError(false);
     setPlaced(false);
+    const cardType = cardValidator.number(checkoutData.creditCard).card;
 
-    if (name === 'phoneNo' && value.length != 11) {
+    if (name === 'creditCard') {
       setError(true);
-      setErrorText(
-        'Invalid Phone Number (Should be 11 digits and start with 03).'
-      );
-    } else if (name === 'phoneNo' && !/^03/.test(value)) {
-      setError(true);
-      setErrorText(
-        'Invalid Phone Number (Should be 11 digits and start with 03).'
-      );
-    }
-    if (name === 'creditCard' && !/^(?:4[0-9]{12}(?:[0-9]{3})?)$/.test(value)) {
-      setError(true);
-      setErrorText('Invalid Visa Credit Card Number.');
+      setErrorText('Invalid Card');
+      console.log(checkoutData.creditCard.length);
+      if (cardType) {
+        setError(true);
+        setErrorText('Good');
+      }
     }
     if (name === 'zipCode' && value.length != 5) {
       setError(true);
@@ -299,7 +314,7 @@ export default function Checkout() {
               id="phoneInputID"
             />
 
-            <Input
+            <CCInput
               type="text"
               name="creditCard"
               value={checkoutData.creditCard}
@@ -323,7 +338,7 @@ export default function Checkout() {
               placeholder="2nd Address"
             />
 
-            <Input
+            <ZipInput
               type="text"
               name="zipCode"
               value={checkoutData.zipCode}
