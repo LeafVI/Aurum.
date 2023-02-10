@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import cardValidator from 'card-validator';
+import CreditCardInput from 'react-credit-card-input';
 
 const Logo = styled(Link)`
   font-family: 'inter';      
@@ -183,13 +184,17 @@ export default function Checkout() {
     firstname: '',
     lastName: '',
     phoneNo: '',
-    creditCard: '',
+    creditCard: {
+      cardNumber: '',
+      cardExpiry: '',
+      cardCVC: '',
+    },
     zipCode: '',
     address1: '',
     address2: '',
   });
 
-  const [countryCode, setCountryCode] = React.useState('PK');
+  const [isValid, setIsValid] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [errorText, setErrorText] = React.useState('');
   const [placed, setPlaced] = React.useState(false);
@@ -218,6 +223,43 @@ export default function Checkout() {
         phoneNo: event,
       };
     });
+  }
+
+  function handleCC(e) {
+    const { name, value } = e.target;
+
+    setCheckOutData((prevCheckoutData) => {
+      return {
+        ...prevCheckoutData,
+        creditCard: {
+          [name]: value,
+        },
+      };
+    });
+
+    function yes() {
+      let sum = 0;
+      let digit;
+      let addend;
+      let timesTwo;
+      for (let i = checkoutData.creditCard.cardNumber - 1; i >= 0; i--) {
+        digit = checkoutData.creditCard.cardNumber.substring(i, i + 1);
+        sum += parseInt(digit, 10);
+        if ((checkoutData.creditCard.cardNumber - i) % 2 === 0) {
+          timesTwo = parseInt(digit, 10) * 2;
+          if (timesTwo >= 10) {
+            addend = (timesTwo % 10) + 1;
+          } else {
+            addend = timesTwo;
+          }
+          sum += addend;
+        }
+      }
+      setIsValid(sum % 10 === 0);
+      return sum % 10 === 0;
+    }
+
+    yes();
   }
 
   function handleChange(event) {
@@ -303,6 +345,25 @@ export default function Checkout() {
               placeholder="Last Name"
             />
 
+            <CreditCardInput
+              cardNumberInputProps={{
+                name: 'cardNumber',
+                value: checkoutData.creditCard.cardNumber,
+                onChange: handleCC,
+              }}
+              cardExpiryInputProps={{
+                name: 'cardExpiry',
+                value: checkoutData.creditCard.cardExpiry,
+                onChange: handleCC,
+              }}
+              cardCVCInputProps={{
+                name: 'cardCVC',
+                value: checkoutData.creditCard.cardCVC,
+                onChange: handleCC,
+              }}
+              fieldClassName="form-group"
+            />
+
             <PhoneInput
               value={checkoutData.phoneNo}
               onChange={handlePhone}
@@ -346,7 +407,7 @@ export default function Checkout() {
               placeholder="Zipcode (Five Digits)"
             />
 
-            <BBtn onClick={handleSubmit}>Place Order</BBtn>
+            {isValid && <BBtn onClick={handleSubmit}>Place Order</BBtn>}
           </Form>
         </RegContainer>
         <CartCont>
