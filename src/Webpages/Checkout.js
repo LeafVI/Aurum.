@@ -227,6 +227,7 @@ export default function Checkout() {
 
   function handleCC(e) {
     const { name, value } = e.target;
+    setError(false);
 
     setCheckOutData((prevCheckoutData) => {
       return {
@@ -236,30 +237,11 @@ export default function Checkout() {
         },
       };
     });
+  }
 
-    function yes() {
-      let sum = 0;
-      let digit;
-      let addend;
-      let timesTwo;
-      for (let i = checkoutData.creditCard.cardNumber - 1; i >= 0; i--) {
-        digit = checkoutData.creditCard.cardNumber.substring(i, i + 1);
-        sum += parseInt(digit, 10);
-        if ((checkoutData.creditCard.cardNumber - i) % 2 === 0) {
-          timesTwo = parseInt(digit, 10) * 2;
-          if (timesTwo >= 10) {
-            addend = (timesTwo % 10) + 1;
-          } else {
-            addend = timesTwo;
-          }
-          sum += addend;
-        }
-      }
-      setIsValid(sum % 10 === 0);
-      return sum % 10 === 0;
-    }
-
-    yes();
+  function handleCCError(error) {
+    setError(true);
+    setErrorText('invalid');
   }
 
   function handleChange(event) {
@@ -362,6 +344,7 @@ export default function Checkout() {
                 onChange: handleCC,
               }}
               fieldClassName="form-group"
+              onError={() => handleCCError(error)}
             />
 
             <PhoneInput
