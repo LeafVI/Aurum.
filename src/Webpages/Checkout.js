@@ -155,6 +155,11 @@ const BBtn = styled.button`
   }
   `;
 
+const ZipDiv = styled.div`
+ display: flex;
+ flex-direction: column;
+`;
+
 const Div = styled.div`
     
     display: flex;
@@ -358,14 +363,6 @@ export default function Checkout() {
               id="phoneInputID"
             />
 
-            <CCInput
-              type="text"
-              name="creditCard"
-              value={checkoutData.creditCard}
-              onChange={handleChange}
-              placeholder="Credit Card No. (VISA)"
-            />
-
             <Input
               type="text"
               name="address1"
@@ -382,13 +379,20 @@ export default function Checkout() {
               placeholder="2nd Address"
             />
 
-            <ZipInput
-              type="text"
-              name="zipCode"
-              value={checkoutData.zipCode}
-              onChange={handleChange}
-              placeholder="Zipcode (Five Digits)"
-            />
+            <ZipDiv>
+              <ZipInput
+                type="text"
+                name="zipCode"
+                value={checkoutData.zipCode}
+                onChange={handleChange}
+                placeholder="Zipcode (Five Digits)"
+              />
+              {zipCodeError && (
+                <p style={{ color: 'red', fontSize: '10px' }}>
+                  Zip Code should be 5 digits long.
+                </p>
+              )}
+            </ZipDiv>
 
             {isValid && <BBtn onClick={handleSubmit}>Place Order</BBtn>}
           </Form>
