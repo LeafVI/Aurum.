@@ -89,6 +89,18 @@ const Form = styled.form`
   }
  `;
 
+const ZipDiv = styled.div`
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+`;
+
+const CCDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+
+`;
+
 const Input = styled.input`
   margin: 1rem;
   padding: 20px;
@@ -110,7 +122,8 @@ const CCInput = styled.input.attrs({ maxLength: 16 })`
  `;
 
 const ZipInput = styled.input.attrs({ maxLength: 5 })`
- margin: 1rem;
+ margin-top: 0.5rem;
+ margin-bottom: 0.3rem;
  padding: 20px;
 
  @media (max-width: 1000px) {
@@ -140,6 +153,7 @@ const BBtn = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
+  
 
   &:hover{
     background-color: white;
@@ -154,11 +168,6 @@ const BBtn = styled.button`
    height: 40px;
   }
   `;
-
-const ZipDiv = styled.div`
- display: flex;
- flex-direction: column;
-`;
 
 const Div = styled.div`
     
@@ -199,7 +208,8 @@ export default function Checkout() {
     address2: '',
   });
 
-  const [isValid, setIsValid] = React.useState(false);
+  const [ccError, setCCError] = React.useState(false);
+  const [zipCodeError, setZipCodeError] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [errorText, setErrorText] = React.useState('');
   const [placed, setPlaced] = React.useState(false);
@@ -233,6 +243,16 @@ export default function Checkout() {
   function handleCC(e) {
     const { name, value } = e.target;
     setError(false);
+    setCCError(false);
+
+    if (name === 'cardNumber') {
+      const cardType = cardValidator.number(
+        checkoutData.creditCard.cardNumber
+      ).card;
+      if (!cardType || !checkoutData.creditCard.cardNumber.length >= 16) {
+        setCCError(true);
+      }
+    }
 
     setCheckOutData((prevCheckoutData) => {
       return {
@@ -253,7 +273,7 @@ export default function Checkout() {
     const { name, value } = event.target;
     setError(false);
     setPlaced(false);
-    const cardType = cardValidator.number(checkoutData.creditCard).card;
+    setZipCodeError(false);
 
     if (name === 'creditCard') {
       setError(true);
@@ -265,8 +285,11 @@ export default function Checkout() {
       }
     }
     if (name === 'zipCode' && value.length != 5) {
-      setError(true);
-      setErrorText('Zip Code should be 5 letters.');
+      setZipCodeError(true);
+      const re = /^[0-9\b]+$/;
+      if (value === '' || re.test(value) === false) {
+        return;
+      }
     }
 
     setCheckOutData((prevCheckoutData) => {
@@ -311,7 +334,6 @@ export default function Checkout() {
       <Container>
         <RegContainer>
           <Title>Checkout</Title>
-          {error && <span style={{ color: 'red' }}>{errorText}</span>}
           {placed && (
             <span style={{ color: 'black' }}> Your order has been placed </span>
           )}
@@ -332,26 +354,27 @@ export default function Checkout() {
               placeholder="Last Name"
             />
 
-            <CreditCardInput
-              cardNumberInputProps={{
-                name: 'cardNumber',
-                value: checkoutData.creditCard.cardNumber,
-                onChange: handleCC,
-              }}
-              cardExpiryInputProps={{
-                name: 'cardExpiry',
-                value: checkoutData.creditCard.cardExpiry,
-                onChange: handleCC,
-              }}
-              cardCVCInputProps={{
-                name: 'cardCVC',
-                value: checkoutData.creditCard.cardCVC,
-                onChange: handleCC,
-              }}
-              fieldClassName="form-group"
-              onError={() => handleCCError(error)}
-            />
-
+            <CCDiv>
+              <CreditCardInput
+                cardNumberInputProps={{
+                  name: 'cardNumber',
+                  value: checkoutData.creditCard.cardNumber,
+                  onChange: handleCC,
+                }}
+                cardExpiryInputProps={{
+                  name: 'cardExpiry',
+                  value: checkoutData.creditCard.cardExpiry,
+                  onChange: handleCC,
+                }}
+                cardCVCInputProps={{
+                  name: 'cardCVC',
+                  value: checkoutData.creditCard.cardCVC,
+                  onChange: handleCC,
+                }}
+                fieldClassName="form-group"
+                onError={() => setCCError(true)}
+              />
+            </CCDiv>
             <PhoneInput
               value={checkoutData.phoneNo}
               onChange={handlePhone}
@@ -386,15 +409,24 @@ export default function Checkout() {
                 value={checkoutData.zipCode}
                 onChange={handleChange}
                 placeholder="Zipcode (Five Digits)"
+                pattern="[0-9]+"
               />
               {zipCodeError && (
-                <p style={{ color: 'red', fontSize: '10px' }}>
+                <p
+                  style={{
+                    color: 'red',
+                    fontSize: '15px',
+                    margin: '0',
+                    marginTop: '0.5rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
                   Zip Code should be 5 digits long.
                 </p>
               )}
             </ZipDiv>
 
-            {isValid && <BBtn onClick={handleSubmit}>Place Order</BBtn>}
+            <BBtn onClick={handleSubmit}>Place Order</BBtn>
           </Form>
         </RegContainer>
         <CartCont>
