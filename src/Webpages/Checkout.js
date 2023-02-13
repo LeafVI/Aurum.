@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import PhoneInput from 'react-phone-number-input';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import cardValidator from 'card-validator';
 import CreditCardInput from 'react-credit-card-input';
@@ -101,6 +101,12 @@ const CCDiv = styled.div`
   align-items: center;
 `;
 
+const PhoneDiv = styled.div`
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+`;
+
 const Input = styled.input`
   margin: 1rem;
   padding: 20px;
@@ -109,16 +115,6 @@ const Input = styled.input`
    margin: 0.5rem;
    padding: 10px;   
   }
- `;
-
-const CCInput = styled.input.attrs({ maxLength: 16 })`
- margin: 1rem;
- padding: 20px;
-
- @media (max-width: 1000px) {
-  margin: 0.5rem;
-  padding: 10px;   
- }
  `;
 
 const ZipInput = styled.input.attrs({ maxLength: 5 })`
@@ -208,6 +204,7 @@ export default function Checkout() {
     address2: '',
   });
 
+  const [phoneError, setPhoneError] = React.useState(false);
   const [ccError, setCCError] = React.useState(false);
   const [zipCodeError, setZipCodeError] = React.useState(false);
   const [error, setError] = React.useState(false);
@@ -232,6 +229,9 @@ export default function Checkout() {
   });
 
   function handlePhone(event) {
+    setPhoneError(false);
+    setPlaced(false);
+
     setCheckOutData((prevCheckoutData) => {
       return {
         ...prevCheckoutData,
@@ -244,6 +244,7 @@ export default function Checkout() {
     const { name, value } = e.target;
     setError(false);
     setCCError(false);
+    setPlaced(false);
 
     if (name === 'cardNumber') {
       const cardType = cardValidator.number(
@@ -262,11 +263,6 @@ export default function Checkout() {
         },
       };
     });
-  }
-
-  function handleCCError(error) {
-    setError(true);
-    setErrorText('invalid');
   }
 
   function handleChange(event) {
@@ -294,28 +290,26 @@ export default function Checkout() {
   function handleSubmit(event) {
     event.preventDefault();
 
+    if (!isValidPhoneNumber(checkoutData.phoneNo)) {
+      setPhoneError(true);
+      return;
+    }
+
     if (
       !checkoutData.firstname ||
       !checkoutData.lastname ||
       !checkoutData.phoneNo ||
       !checkoutData.creditCard ||
       !checkoutData.zipCode ||
-      error
+      phoneError ||
+      zipCodeError ||
+      ccError
     ) {
       setError(true);
       setErrorText('Fill out the forms correctly please');
       return;
     }
-    if (
-      checkoutData.phoneNo.length != 11 ||
-      !/^03/.test(checkoutData.phoneNo) ||
-      !/^(?:4[0-9]{12}(?:[0-9]{3})?)$/.test(checkoutData.creditCard) ||
-      checkoutData.zipCode.length != 5
-    ) {
-      setError(true);
-      setErrorText('Fill out the forms correctly please');
-      return;
-    }
+
     setPlaced(true);
   }
 
@@ -325,6 +319,11 @@ export default function Checkout() {
       <Container>
         <RegContainer>
           <Title>Checkout</Title>
+          {error && (
+            <span style={{ color: 'red' }}>
+              Fill the form correctly please.
+            </span>
+          )}
           {placed && (
             <span style={{ color: 'black' }}> Your order has been placed </span>
           )}
@@ -366,16 +365,25 @@ export default function Checkout() {
                 onError={() => setCCError(true)}
               />
             </CCDiv>
-            <PhoneInput
-              value={checkoutData.phoneNo}
-              onChange={handlePhone}
-              placeholder="Phone Number"
-              style={{ width: '250px', padding: '30px' }}
-              defaultCountry="PK"
-              countries={['PK']}
-              maxlength="12"
-              id="phoneInputID"
-            />
+
+            <PhoneDiv>
+              <PhoneInput
+                value={checkoutData.phoneNo}
+                onChange={handlePhone}
+                placeholder="Phone Number"
+                style={{ width: '250px', padding: '30px' }}
+                defaultCountry="PK"
+                countries={['PK']}
+                maxlength="12"
+                id="phoneInputID"
+              />
+
+              {phoneError && (
+                <p style={{ color: 'red', fontSize: '15px', margin: '0.3rem' }}>
+                  Invalid Phone number.
+                </p>
+              )}
+            </PhoneDiv>
 
             <Input
               type="text"
