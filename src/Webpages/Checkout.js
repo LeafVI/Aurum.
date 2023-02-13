@@ -98,7 +98,7 @@ const ZipDiv = styled.div`
 const CCDiv = styled.div`
   display: flex;
   flex-direction: column;
-
+  align-items: center;
 `;
 
 const Input = styled.input`
@@ -275,15 +275,6 @@ export default function Checkout() {
     setPlaced(false);
     setZipCodeError(false);
 
-    if (name === 'creditCard') {
-      setError(true);
-      setErrorText('Invalid Card');
-      console.log(checkoutData.creditCard.length);
-      if (cardType) {
-        setError(true);
-        setErrorText('Good');
-      }
-    }
     if (name === 'zipCode' && value.length != 5) {
       setZipCodeError(true);
       const re = /^[0-9\b]+$/;
